@@ -8,6 +8,7 @@ const TILE_ATTR = '&copy; <a href="https://carto.com/">CARTO</a>';
 
 export default function MapView({
   currentYear,
+  currentMode,
   worldGeoJSON,
   aiOverrides,
   isLoading,
@@ -52,7 +53,8 @@ export default function MapView({
     const map = mapRef.current;
     if (!map || !worldGeoJSON) return;
 
-    const eraKey = getEraKey(currentYear);
+    const effectiveYear = (currentMode === 'alt-history' && aiOverrides) ? 2026 : currentYear;
+    const eraKey = getEraKey(effectiveYear);
     const era = ERA_DATA[eraKey];
 
     // Build country → style lookup
@@ -111,7 +113,7 @@ export default function MapView({
         const groupLabel = s ? capitalize(s.group || '') : 'Independent';
         layer.unbindTooltip();
         layer.bindTooltip(
-          `<strong>${displayName}</strong><br/><span style="opacity:0.6;font-size:10px">${groupLabel} · ${currentYear}</span>`,
+          `<strong>${displayName}</strong><br/><span style="opacity:0.6;font-size:10px">${groupLabel} · ${effectiveYear}</span>`,
           { className: 'country-tooltip', sticky: true, direction: 'top', offset: [0, -4] }
         );
       });
@@ -138,7 +140,7 @@ export default function MapView({
         const s = styleMap[name];
         const groupLabel = s ? capitalize(s.group || '') : 'Independent';
         layer.bindTooltip(
-          `<strong>${name}</strong><br/><span style="opacity:0.6;font-size:10px">${groupLabel} · ${currentYear}</span>`,
+          `<strong>${name}</strong><br/><span style="opacity:0.6;font-size:10px">${groupLabel} · ${effectiveYear}</span>`,
           { className: 'country-tooltip', sticky: true, direction: 'top', offset: [0, -4] }
         );
         layer.on('mouseover', function () {
@@ -156,7 +158,7 @@ export default function MapView({
     }).addTo(map);
 
     geoLayerRef.current = geoLayer;
-  }, [worldGeoJSON, currentYear, aiOverrides]);
+  }, [worldGeoJSON, currentYear, currentMode, aiOverrides]);
 
   return (
     <div className="map-wrapper">

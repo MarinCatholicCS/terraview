@@ -11,7 +11,7 @@ export default function YearControl({ currentYear, onYearChange }) {
   }, [currentYear]);
 
   function commitYear(value) {
-    const year = Math.max(-3000, Math.min(2024, parseInt(value) || 1945));
+    const year = Math.max(-3000, Math.min(2026, parseInt(value) || 1945));
     onYearChange(year);
   }
 
@@ -28,7 +28,7 @@ export default function YearControl({ currentYear, onYearChange }) {
           className="year-input"
           placeholder="Enter year…"
           min="-3000"
-          max="2024"
+          max="2026"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') commitYear(e.target.value); }}
@@ -40,7 +40,7 @@ export default function YearControl({ currentYear, onYearChange }) {
         type="range"
         className="year-slider"
         min="1"
-        max="2024"
+        max="2026"
         value={sliderValue}
         onInput={(e) => {
           const y = parseInt(e.target.value);
@@ -50,7 +50,7 @@ export default function YearControl({ currentYear, onYearChange }) {
         onChange={(e) => commitYear(e.target.value)}
       />
       <div className="slider-labels">
-        <span>1 AD</span><span>500</span><span>1000</span><span>1500</span><span>2024</span>
+        <span>1 AD</span><span>500</span><span>1000</span><span>1500</span><span>2026</span>
       </div>
     </div>
   );

@@ -30,8 +30,8 @@ export default {
         return jsonResponse({ error: 'Missing prompt' }, 400);
       }
 
-      // 3. Call Gemini API
-      const result = await callGemini(env.GEMINI_API_KEY, prompt, currentYear, countryList);
+      // 3. Call Claude API
+      const result = await callClaude(env.ANTHROPIC_API_KEY, prompt, currentYear, countryList);
       return jsonResponse(result);
     } catch (err) {
       const status = (err && err.status) ? err.status : 500;
@@ -98,87 +98,94 @@ function base64UrlToArrayBuffer(base64url) {
   return bytes.buffer;
 }
 
-async function callGemini(apiKey, prompt, currentYear, countryList) {
-  const systemPrompt = `You are an aggressive alt-history cartographer AI for TerraView. The user wants to visualize: "${prompt}" in the year ${currentYear}.
+async function callClaude(apiKey, prompt, currentYear, countryList) {
+  const systemPrompt = `You are a hypothetical impact simulator for TerraView. Given a hypothetical scenario, trace its cascading consequences forward through history to the present day (${currentYear}).
+
+Your job: show what the MODERN world map would look like TODAY if this hypothetical had actually happened. Use present-day country names and borders as the baseline, then recolor them based on how this scenario would have reshaped geopolitics by now.
 
 CRITICAL RULES — follow these without exception:
-1. Think in MASSIVE ripple effects. A single event reshapes dozens of countries. Never leave an affected region unchanged.
-2. The scenario's dominant power MUST conquer, vassalize, or heavily influence a large number of countries. If someone asks about Mongol invasion of the US, color the US and neighboring territories as Mongol-controlled/influenced — do not leave them "independent".
-3. Conquered or occupied countries get the conqueror's color. Vassals/tributaries get a lighter shade or the "colonial" brown. Allies get the allied color.
-4. Ripple effects: neighboring countries react — some ally with the invader, some resist and get colored differently, some collapse. Show these consequences on the map.
-5. Include ALL countries meaningfully affected — typically 60-180 countries for world-spanning scenarios. Do not be conservative. If a superpower rises, much of the world is affected.
+1. Think in cascading consequences across decades and centuries. A single divergence point reshapes the entire trajectory of history. Trace the chain reaction all the way to the modern day.
+2. The scenario's dominant power or ideology MUST have spread, evolved, or influenced a large number of modern countries by ${currentYear}. Show successor states, ideological blocs, and spheres of influence as they would exist TODAY.
+3. Countries aligned with the dominant power get its color. Vassal/satellite states get brown. Resistant coalitions get steel blue. Show how alliances and rivalries would have evolved.
+4. Ripple effects compound over time: economic dependencies shift, alliances form and break, ideologies spread or collapse. Show these modern-day consequences on the map.
+5. Include ALL countries meaningfully affected — typically 60-180 countries for world-spanning scenarios. If a superpower or ideology rose, most of the world is affected by ${currentYear}.
 6. Never leave a country on its default color if the scenario plausibly touches it.
-7. Be dramatic and historically creative. This is alt-history — lean into the chaos.
+7. Be dramatic and historically creative. Trace the butterflies — small changes compound into massive modern-day differences.
 
-Return ONLY a JSON object (no markdown, no code fences, no explanation) in this exact format:
+Available country names from the dataset: ${countryList}
+
+Color palette:
+- #b5451b (rust/red) for the dominant power's core territories and successor states
+- #4a6fa5 (steel blue) for resisting coalitions and democratic opposition blocs
+- #5a8a5a (muted green) for neutral states far from the conflict (use sparingly)
+- #8a6a4a (earth brown) for satellite states, occupied territories, or vassal nations
+- #c9973a (gold) for rising/opportunist powers that exploited the altered timeline
+- #7a4a8a (purple) for collapsed or balkanized former empires
+- #3a6a5a (teal) for secondary allied blocs or puppet states
+
+Example: "What if Hitler won WW2?" → In ${currentYear}: Greater Germanic Reich controls Central Europe (#b5451b), satellite states across Eastern Europe (#8a6a4a), a cold-war-style democratic resistance bloc in the Americas and UK (#4a6fa5), Japanese co-prosperity sphere across East Asia (#c9973a), collapsed Soviet successor states (#7a4a8a), neutral holdouts in South America (#5a8a5a). Almost no country is untouched by ${currentYear}.
+
+You MUST respond with ONLY a JSON object — no markdown, no code fences, no explanation before or after. Just the raw JSON.`;
+
+  const userMessage = `Scenario: "${prompt}"
+
+Respond with a JSON object in this exact format:
 {
-  "narrative": "3-4 sentence vivid description of this alternate history scenario and its global consequences",
+  "narrative": "3-4 sentence vivid description of how this hypothetical reshaped history and what the modern world (${currentYear}) looks like as a result",
   "countries": {
     "Country Name": { "color": "#hexcolor", "opacity": 0.65, "group": "faction name" }
   },
   "legend": [
     { "color": "#hexcolor", "label": "Faction Name" }
   ]
-}
+}`;
 
-Available country names from the dataset: ${countryList}
-
-Color palette:
-- #b5451b (rust/red) for conquering/dominant aggressive powers and their core territories
-- #4a6fa5 (steel blue) for resisting coalitions and allied democratic powers
-- #5a8a5a (muted green) for neutral states far from the conflict (use sparingly)
-- #8a6a4a (earth brown) for vassal states, occupied or tributary territories
-- #c9973a (gold) for rising/opportunist powers exploiting the chaos
-- #7a4a8a (purple) for collapsed or balkanized former empires
-- #3a6a5a (teal) for secondary allied blocs or puppet states
-
-Example: "Mongols invade the USA in 1200" → color all of North America as Mongol-conquered (#b5451b), South America as gold opportunist states (#c9973a), Europe as frightened coalition (#4a6fa5), Central Asia as Mongol heartland (#b5451b), Middle East as vassal (#8a6a4a), etc. Almost no country is left untouched.`;
-
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: systemPrompt }] }],
-        generationConfig: {
-          temperature: 1.0,
-          maxOutputTokens: 8192,
-          responseMimeType: 'application/json',
-          thinkingConfig: { thinkingBudget: 0 },
-        },
-      }),
-    }
-  );
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 16384,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMessage }],
+    }),
+  });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Gemini API error: HTTP ${res.status}`);
+    throw new Error(err.error?.message || `Claude API error: HTTP ${res.status}`);
   }
 
   const data = await res.json();
-  const parts = data.candidates?.[0]?.content?.parts || [];
 
-  const rawText = parts
-    .filter((p) => !p.thought)
-    .map((p) => p.text || '')
+  if (data.stop_reason && data.stop_reason !== 'end_turn' && data.stop_reason !== 'max_tokens') {
+    throw new Error(`Claude stop reason: ${data.stop_reason}`);
+  }
+
+  const rawText = (data.content || [])
+    .filter((b) => b.type === 'text')
+    .map((b) => b.text)
     .join('')
     .trim();
 
   if (!rawText) {
-    throw new Error('Gemini returned no content');
+    throw new Error('Claude returned no text content');
   }
 
-  return parseGeminiJson(rawText);
+  return parseJson(rawText);
 }
 
-function parseGeminiJson(text) {
+function parseJson(text) {
   const cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
 
   try {
     return JSON.parse(cleaned);
   } catch {
-    // ignored
+    // ignored — try brace matching
   }
 
   let depth = 0;
@@ -199,7 +206,7 @@ function parseGeminiJson(text) {
     }
   }
 
-  throw new Error('Could not parse Gemini response');
+  throw new Error('Could not parse response: ' + cleaned.slice(0, 200));
 }
 
 class HttpError extends Error {

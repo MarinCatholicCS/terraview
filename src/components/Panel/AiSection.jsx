@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { queryGemini } from '../../services/gemini';
+import { queryAI } from '../../services/gemini';
 
 export default function AiSection({
   currentYear,
@@ -24,7 +24,7 @@ export default function AiSection({
     if (!prompt.trim()) { showResponse('⚠ Describe a scenario to visualize.'); return; }
 
     setLoading(true);
-    onLoadingChange(true, 'Querying Gemini AI…');
+    onLoadingChange(true, 'Simulating alternate timeline…');
 
     const countryList = worldGeoJSON
       ? worldGeoJSON.features.map(f => f.properties.ADMIN || f.properties.name).filter(Boolean).join(', ')
@@ -32,10 +32,10 @@ export default function AiSection({
 
     try {
       const idToken = await user.getIdToken();
-      const result = await queryGemini({
+      const result = await queryAI({
         idToken,
         prompt: prompt.trim(),
-        currentYear,
+        currentYear: 2026,
         countryList,
       });
 
@@ -57,11 +57,11 @@ export default function AiSection({
 
   return (
     <div className="ai-section">
-      <div className="section-label">Gemini AI Layer</div>
+      <div className="section-label">What If? Simulator</div>
 
       <textarea
         className="ai-prompt"
-        placeholder={"Describe a scenario…\ne.g. 'What if Nazi Germany won WWII?'\ne.g. 'Show the Roman Empire at its peak'"}
+        placeholder={"What if…?\ne.g. 'What if Hitler won WW2?'\ne.g. 'What if the Roman Empire never fell?'"}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
       />
@@ -70,12 +70,12 @@ export default function AiSection({
         className={`apply-btn${loading ? ' loading' : ''}`}
         onClick={handleApply}
       >
-        {loading ? 'Consulting Gemini…' : 'Apply to Map'}
+        {loading ? 'Simulating…' : 'Simulate'}
       </button>
 
       {currentMode === 'alt-history' && (
         <button className="reset-btn" onClick={handleReset}>
-          ← Reset to Historical View
+          ← Reset to Present Day
         </button>
       )}
 

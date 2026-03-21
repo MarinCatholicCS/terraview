@@ -1,6 +1,6 @@
 const WORKER_URL = import.meta.env.VITE_WORKER_URL;
 
-export async function queryGemini({ idToken, prompt, currentYear, countryList }) {
+export async function queryAI({ idToken, prompt, currentYear, countryList }) {
   if (!WORKER_URL) {
     throw new Error('VITE_WORKER_URL is not configured');
   }
