@@ -81,7 +81,6 @@ export default function App() {
         currentYear={currentYear}
         currentMode={currentMode}
         worldGeoJSON={worldGeoJSON}
-        aiLegend={aiLegend}
         statusText={statusText}
         onYearChange={handleYearChange}
         onModeChange={handleModeChange}
@@ -96,6 +95,7 @@ export default function App() {
         currentMode={currentMode}
         worldGeoJSON={worldGeoJSON}
         aiOverrides={aiOverrides}
+        aiLegend={aiLegend}
         isLoading={isLoading}
         loadingText={loadingText}
       />

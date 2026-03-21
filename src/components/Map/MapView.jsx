@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react';
 import L from 'leaflet';
 import { getEraKey, ERA_DATA } from '../../data/eraData';
 import { capitalize } from '../../utils/helpers';
+import Legend from '../Panel/Legend';
 
 const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 const TILE_ATTR = '&copy; <a href="https://carto.com/">CARTO</a>';
@@ -11,6 +12,7 @@ export default function MapView({
   currentMode,
   worldGeoJSON,
   aiOverrides,
+  aiLegend,
   isLoading,
   loadingText,
 }) {
@@ -122,8 +124,8 @@ export default function MapView({
       <div className="map-container" ref={mapContainerRef} />
 
       <div className="map-topbar">
-<div className="mode-badge">
-          {currentMode === 'alt-history' ? 'Alt-History Mode' : 'Historical Mode'}
+        <div className="map-legend-overlay">
+          <Legend currentYear={currentYear} aiLegend={aiLegend} />
         </div>
       </div>
 

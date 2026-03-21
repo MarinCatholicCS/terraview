@@ -482,6 +482,18 @@ body {
   border-radius: 1px;
 }
 
+/* Legend overlay on map */
+.map-legend-overlay {
+  pointer-events: none;
+}
+
+.map-legend-overlay .legend {
+  background: rgba(28, 31, 36, 0.82);
+  border: 1px solid rgba(200,168,75,0.2);
+  backdrop-filter: blur(4px);
+  min-width: 140px;
+}
+
 /* Loading overlay */
 .loading-overlay {
   position: absolute;

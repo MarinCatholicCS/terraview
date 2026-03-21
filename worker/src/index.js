@@ -157,7 +157,15 @@ Example: "Mongols invade the USA in 1200" → color all of North America as Mong
   }
 
   const data = await res.json();
-  const parts = data.candidates?.[0]?.content?.parts || [];
+
+  // Surface finish reason issues (safety blocks, recitation, etc.)
+  const candidate = data.candidates?.[0];
+  const finishReason = candidate?.finishReason;
+  if (finishReason && finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
+    throw new Error(`Gemini stopped: ${finishReason}`);
+  }
+
+  const parts = candidate?.content?.parts || [];
 
   const rawText = parts
     .filter((p) => !p.thought)
@@ -173,6 +181,7 @@ Example: "Mongols invade the USA in 1200" → color all of North America as Mong
 }
 
 function parseGeminiJson(text) {
+  // Strip markdown fences if present
   const cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
 
   try {
@@ -181,6 +190,7 @@ function parseGeminiJson(text) {
     // ignored
   }
 
+  // Find outermost JSON object
   let depth = 0;
   let start = -1;
   for (let i = 0; i < cleaned.length; i++) {
@@ -199,7 +209,8 @@ function parseGeminiJson(text) {
     }
   }
 
-  throw new Error('Could not parse Gemini response');
+  const preview = cleaned.slice(0, 300);
+  throw new Error(`Could not parse Gemini response. Raw start: ${preview}`);
 }
 
 class HttpError extends Error {

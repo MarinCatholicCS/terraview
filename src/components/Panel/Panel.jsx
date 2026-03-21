@@ -2,14 +2,12 @@ import { useState } from 'react';
 import PanelHeader from './PanelHeader';
 import YearControl from './YearControl';
 import AiSection from './AiSection';
-import Legend from './Legend';
 import StatusBar from './StatusBar';
 
 export default function Panel({
   currentYear,
   currentMode,
   worldGeoJSON,
-  aiLegend,
   statusText,
   onYearChange,
   onModeChange,
@@ -77,8 +75,6 @@ export default function Panel({
           onModeChange={onModeChange}
           user={user}
         />
-
-        <Legend currentYear={currentYear} aiLegend={aiLegend} />
 
         <p className="info-note">
           Border data is approximated per era. AI layer modifies territory colors and descriptions.
