@@ -1,4 +1,6 @@
-export async function queryGemini({ apiKey, prompt, currentYear, countryList }) {
+const WORKER_URL = import.meta.env.VITE_WORKER_URL;
+
+export async function queryGemini({ prompt, currentYear, countryList }) {
   const systemPrompt = `You are a historical cartographer AI for TerraView. The user wants to visualize: "${prompt}" in the year ${currentYear}.
 
 Return ONLY valid JSON in this exact format:
@@ -26,25 +28,19 @@ Color palette to use:
 
 Only include countries relevant to the scenario. Be historically informed but creative for alt-history.`;
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: systemPrompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
-      }),
-    }
-  );
+  const res = await fetch(`${WORKER_URL}/api/ai`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: systemPrompt }),
+  });
 
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error?.message || `HTTP ${res.status}`);
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
   }
 
   const data = await res.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const rawText = data.text || '';
 
   const jsonMatch = rawText.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No JSON in response');

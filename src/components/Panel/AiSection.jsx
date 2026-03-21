@@ -8,7 +8,6 @@ export default function AiSection({
   onLoadingChange,
   onModeChange,
 }) {
-  const [apiKey, setApiKey] = useState('');
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [responseVisible, setResponseVisible] = useState(false);
@@ -20,7 +19,6 @@ export default function AiSection({
   }
 
   async function handleApply() {
-    if (!apiKey.trim()) { showResponse('⚠ Please enter your Gemini API key above.'); return; }
     if (!prompt.trim()) { showResponse('⚠ Describe a scenario to visualize.'); return; }
 
     setLoading(true);
@@ -32,7 +30,6 @@ export default function AiSection({
 
     try {
       const result = await queryGemini({
-        apiKey: apiKey.trim(),
         prompt: prompt.trim(),
         currentYear,
         countryList,
@@ -52,13 +49,6 @@ export default function AiSection({
   return (
     <div className="ai-section">
       <div className="section-label">Gemini AI Layer</div>
-      <input
-        className="gemini-key-input"
-        type="password"
-        placeholder="Paste your Gemini API key…"
-        value={apiKey}
-        onChange={(e) => setApiKey(e.target.value)}
-      />
       <textarea
         className="ai-prompt"
         placeholder={"Describe a scenario…\ne.g. 'What if Nazi Germany won WWII?'\ne.g. 'Show the Roman Empire at its peak'"}
