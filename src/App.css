@@ -92,21 +92,6 @@ body {
   position: relative;
 }
 
-.year-display {
-  font-family: var(--mono);
-  font-size: 64px;
-  font-weight: 700;
-  color: var(--parchment);
-  line-height: 1;
-  letter-spacing: 4px;
-  opacity: 0.07;
-  position: absolute;
-  right: -4px;
-  top: -8px;
-  pointer-events: none;
-  user-select: none;
-}
-
 .year-input {
   width: 100%;
   background: #252830;
@@ -426,60 +411,9 @@ body {
   user-select: none;
 }
 
-/* Year overlay on map */
-.map-year-overlay {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  font-family: var(--mono);
-  font-size: 70px;
-  font-weight: 700;
-  color: rgba(28, 31, 36, 0.06);
-  letter-spacing: 8px;
-  pointer-events: none;
-  user-select: none;
-  z-index: 500;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-/* Top bar on map */
-.map-topbar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 500;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(180deg, rgba(28,31,36,0.82) 0%, transparent 100%);
-  pointer-events: none;
-}
-
-.active-year-badge {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: var(--gold);
-  background: rgba(10,15,20,0.85);
-  padding: 6px 14px;
-  border: 1px solid rgba(200,168,75,0.35);
-  border-radius: 1px;
-}
-
-.mode-badge {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: var(--aged);
-  background: rgba(10,15,20,0.7);
-  padding: 6px 12px;
-  border: 1px solid rgba(212,201,168,0.12);
-  border-radius: 1px;
+/* Smooth territory transitions (fill only, not stroke — so hover border is instant) */
+.leaflet-interactive {
+  transition: fill 0.8s ease, fill-opacity 0.8s ease;
 }
 
 /* Loading overlay */

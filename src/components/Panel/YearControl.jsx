@@ -23,7 +23,6 @@ export default function YearControl({ currentYear, onYearChange }) {
     <div>
       <div className="section-label">Navigate Time</div>
       <div className="year-block">
-        <div className="year-display">{inputValue}</div>
         <input
           type="number"
           className="year-input"

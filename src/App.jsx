@@ -93,7 +93,6 @@ export default function App() {
       />
       <MapView
         currentYear={currentYear}
-        currentMode={currentMode}
         worldGeoJSON={worldGeoJSON}
         aiOverrides={aiOverrides}
         isLoading={isLoading}

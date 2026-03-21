@@ -4,3 +4,5 @@ dist
 CLAUDE.md
 .env
 .env.local
+.vercel
+.env*.local

@@ -3,12 +3,11 @@ import L from 'leaflet';
 import { getEraKey, ERA_DATA } from '../../data/eraData';
 import { capitalize } from '../../utils/helpers';
 
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
 const TILE_ATTR = '&copy; <a href="https://carto.com/">CARTO</a>';
 
 export default function MapView({
   currentYear,
-  currentMode,
   worldGeoJSON,
   aiOverrides,
   isLoading,
@@ -25,8 +24,11 @@ export default function MapView({
     const map = L.map(mapContainerRef.current, {
       center: [20, 10],
       zoom: 2,
+      minZoom: 2,
       zoomControl: false,
       attributionControl: false,
+      maxBounds: [[-90, -180], [90, 180]],
+      maxBoundsViscosity: 1.0,
     });
 
     L.tileLayer(TILE_URL, {
@@ -70,35 +72,69 @@ export default function MapView({
       }
     }
 
-    // Remove old layer
+    function getStyle(name) {
+      const s = styleMap[name];
+      if (s) {
+        return {
+          fillColor: s.color,
+          fillOpacity: s.opacity,
+          color: 'rgba(245,237,224,0.12)',
+          weight: 0.7,
+          opacity: 1,
+        };
+      }
+      return {
+        fillColor: '#1e2f3d',
+        fillOpacity: 0.3,
+        color: 'rgba(245,237,224,0.06)',
+        weight: 0.5,
+        opacity: 1,
+      };
+    }
+
+    // If the layer already exists, animate style updates instead of rebuilding
     if (geoLayerRef.current) {
-      map.removeLayer(geoLayerRef.current);
-      geoLayerRef.current = null;
+      geoLayerRef.current.eachLayer((layer) => {
+        const name = layer.feature.properties.ADMIN || layer.feature.properties.name || '';
+        const newStyle = getStyle(name);
+        layer._baseStyle = newStyle;
+        layer.setStyle(newStyle);
+        // Set fill via style property so CSS transitions animate
+        const el = layer.getElement?.();
+        if (el) {
+          el.style.fill = newStyle.fillColor;
+          el.style.fillOpacity = newStyle.fillOpacity;
+        }
+        // Update tooltip
+        const displayName = name || 'Unknown';
+        const s = styleMap[displayName];
+        const groupLabel = s ? capitalize(s.group || '') : 'Independent';
+        layer.unbindTooltip();
+        layer.bindTooltip(
+          `<strong>${displayName}</strong><br/><span style="opacity:0.6;font-size:10px">${groupLabel} · ${currentYear}</span>`,
+          { className: 'country-tooltip', sticky: true, direction: 'top', offset: [0, -4] }
+        );
+      });
+      return;
     }
 
     const geoLayer = L.geoJSON(worldGeoJSON, {
       style: (feature) => {
         const name = feature.properties.ADMIN || feature.properties.name || '';
-        const s = styleMap[name];
-        if (s) {
-          return {
-            fillColor: s.color,
-            fillOpacity: s.opacity,
-            color: 'rgba(245,237,224,0.12)',
-            weight: 0.7,
-            opacity: 1,
-          };
-        }
-        return {
-          fillColor: '#1e2f3d',
-          fillOpacity: 0.3,
-          color: 'rgba(245,237,224,0.06)',
-          weight: 0.5,
-          opacity: 1,
-        };
+        return getStyle(name);
       },
       onEachFeature: (feature, layer) => {
         const name = feature.properties.ADMIN || feature.properties.name || 'Unknown';
+        const baseStyle = getStyle(name);
+        layer._baseStyle = baseStyle;
+        // Set fill via style property so CSS transitions have a starting value
+        layer.on('add', function () {
+          const el = this.getElement?.();
+          if (el) {
+            el.style.fill = baseStyle.fillColor;
+            el.style.fillOpacity = baseStyle.fillOpacity;
+          }
+        });
         const s = styleMap[name];
         const groupLabel = s ? capitalize(s.group || '') : 'Independent';
         layer.bindTooltip(
@@ -109,7 +145,12 @@ export default function MapView({
           this.setStyle({ weight: 1.5, color: 'rgba(201,151,58,0.5)' });
         });
         layer.on('mouseout', function () {
-          geoLayer.resetStyle(this);
+          this.setStyle(this._baseStyle);
+          const el = this.getElement?.();
+          if (el) {
+            el.style.fill = this._baseStyle.fillColor;
+            el.style.fillOpacity = this._baseStyle.fillOpacity;
+          }
         });
       },
     }).addTo(map);
@@ -120,15 +161,6 @@ export default function MapView({
   return (
     <div className="map-wrapper">
       <div className="map-container" ref={mapContainerRef} />
-
-      <div className="map-topbar">
-        <div className="active-year-badge">Year {currentYear}</div>
-        <div className="mode-badge">
-          {currentMode === 'alt-history' ? 'Alt-History Mode' : 'Historical Mode'}
-        </div>
-      </div>
-
-      <div className="map-year-overlay">{currentYear}</div>
 
       <div className={`loading-overlay${isLoading ? ' visible' : ''}`}>
         <div className="spinner" />
