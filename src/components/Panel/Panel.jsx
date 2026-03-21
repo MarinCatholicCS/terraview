@@ -1,6 +1,5 @@
 import PanelHeader from './PanelHeader';
 import YearControl from './YearControl';
-import ModeToggle from './ModeToggle';
 import AiSection from './AiSection';
 import Legend from './Legend';
 import StatusBar from './StatusBar';
@@ -22,10 +21,10 @@ export default function Panel({
 
       <div className="panel-body">
         <YearControl currentYear={currentYear} onYearChange={onYearChange} />
-        <ModeToggle currentMode={currentMode} onModeChange={onModeChange} />
 
         <AiSection
           currentYear={currentYear}
+          currentMode={currentMode}
           worldGeoJSON={worldGeoJSON}
           onAiResult={onAiResult}
           onLoadingChange={onLoadingChange}
