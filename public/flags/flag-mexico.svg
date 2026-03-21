@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+<rect x="0.00" y="0" width="100.00" height="200" fill="#006847"/><rect x="100.00" y="0" width="100.00" height="200" fill="#FFFFFF"/><rect x="200.00" y="0" width="100.00" height="200" fill="#CE1126"/>
+<g transform="translate(150,100)">
+<circle r="28" fill="#7CB0D2"/>
+<ellipse rx="14" ry="18" fill="#5A8F3C"/>
+<polygon points="-5,-8 5,-8 5,8 -5,8" fill="#8B4513"/>
+<path d="M -18,-8 C -12,-20 12,-20 18,-8 C 12,-5 -12,-5 -18,-8 Z" fill="#CC0000"/>
+</g></svg>

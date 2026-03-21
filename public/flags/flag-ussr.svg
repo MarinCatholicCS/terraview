@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+<rect width="300" height="200" fill="#CC0000"/>
+<polygon points="36.0,7.0 39.4,17.4 50.3,17.4 41.4,23.8 44.8,34.1 36.0,27.7 27.2,34.1 30.6,23.8 21.7,17.4 32.6,17.4" fill="#FFD700"/>
+<path d="M 42,108 C 20,70 40,34 76,32 C 112,30 130,60 118,88 A 18,18 0 0,1 100,91 C 115,68 108,44 76,44 C 48,44 36,68 44,97 Z" fill="#FFD700"/>
+<rect x="105" y="82" width="7" height="33" rx="3" fill="#FFD700" transform="rotate(18,108.5,98.5)"/>
+<rect x="52" y="30" width="46" height="14" rx="2" fill="#FFD700" transform="rotate(-42,75,37)"/>
+<rect x="71" y="43" width="8" height="47" rx="3" fill="#FFD700" transform="rotate(-42,75,66.5)"/></svg>

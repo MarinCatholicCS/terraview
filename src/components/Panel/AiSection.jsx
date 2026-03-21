@@ -21,7 +21,7 @@ export default function AiSection({
   }
 
   async function handleApply() {
-    if (!prompt.trim()) { showResponse('Describe a scenario to visualize.'); return; }
+    if (!prompt.trim()) { showResponse('⚠ Describe a scenario to visualize.'); return; }
 
     setLoading(true);
     onLoadingChange(true, 'Querying Gemini AI…');
