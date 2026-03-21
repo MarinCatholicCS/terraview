@@ -25,13 +25,13 @@ export default {
       await verifyFirebaseToken(idToken, env.FIREBASE_PROJECT_ID);
 
       // 2. Parse request body
-      const { prompt, currentYear, countryList } = await request.json();
+      const { prompt, currentYear } = await request.json();
       if (!prompt) {
         return jsonResponse({ error: 'Missing prompt' }, 400);
       }
 
       // 3. Call Claude API
-      const result = await callClaude(env.ANTHROPIC_API_KEY, prompt, currentYear, countryList);
+      const result = await callClaude(env.ANTHROPIC_API_KEY, prompt, currentYear);
       return jsonResponse(result);
     } catch (err) {
       const status = (err && err.status) ? err.status : 500;
@@ -98,47 +98,36 @@ function base64UrlToArrayBuffer(base64url) {
   return bytes.buffer;
 }
 
-async function callClaude(apiKey, prompt, currentYear, countryList) {
+async function callClaude(apiKey, prompt, currentYear) {
   const systemPrompt = `You are a hypothetical impact simulator for TerraView. Given a hypothetical scenario, trace its cascading consequences forward through history to the present day (${currentYear}).
 
 Your job: show what the MODERN world map would look like TODAY if this hypothetical had actually happened. Use present-day country names and borders as the baseline, then recolor them based on how this scenario would have reshaped geopolitics by now.
 
-CRITICAL RULES — follow these without exception:
-1. Think in cascading consequences across decades and centuries. A single divergence point reshapes the entire trajectory of history. Trace the chain reaction all the way to the modern day.
-2. The scenario's dominant power or ideology MUST have spread, evolved, or influenced a large number of modern countries by ${currentYear}. Show successor states, ideological blocs, and spheres of influence as they would exist TODAY.
-3. Countries aligned with the dominant power get its color. Vassal/satellite states get brown. Resistant coalitions get steel blue. Show how alliances and rivalries would have evolved.
-4. Ripple effects compound over time: economic dependencies shift, alliances form and break, ideologies spread or collapse. Show these modern-day consequences on the map.
-5. Include ALL countries meaningfully affected — typically 60-180 countries for world-spanning scenarios. If a superpower or ideology rose, most of the world is affected by ${currentYear}.
-6. Never leave a country on its default color if the scenario plausibly touches it.
-7. Be dramatic and historically creative. Trace the butterflies — small changes compound into massive modern-day differences.
+CRITICAL RULES:
+1. Trace cascading consequences across decades/centuries to the modern day.
+2. The scenario's dominant power or ideology MUST influence a large number of modern countries by ${currentYear}. Show successor states, ideological blocs, and spheres of influence as they exist TODAY.
+3. Countries aligned with the dominant power get its color. Vassal/satellite states get brown. Resistant coalitions get steel blue.
+4. Include ALL countries meaningfully affected — typically 60-180 countries for world-spanning scenarios.
+5. Never leave a country on its default color if the scenario plausibly touches it.
+6. Be dramatic and historically creative.
 
-Available country names from the dataset: ${countryList}
+Use standard country names as they appear in international GeoJSON datasets (e.g., "United States of America" not "USA", "United Kingdom" not "UK", "Czechia" not "Czech Republic", "Republic of Serbia" not "Serbia", "United Republic of Tanzania" not "Tanzania", "eSwatini" not "Swaziland").
 
 Color palette:
-- #b5451b (rust/red) for the dominant power's core territories and successor states
-- #4a6fa5 (steel blue) for resisting coalitions and democratic opposition blocs
-- #5a8a5a (muted green) for neutral states far from the conflict (use sparingly)
-- #8a6a4a (earth brown) for satellite states, occupied territories, or vassal nations
-- #c9973a (gold) for rising/opportunist powers that exploited the altered timeline
-- #7a4a8a (purple) for collapsed or balkanized former empires
-- #3a6a5a (teal) for secondary allied blocs or puppet states
+- #b5451b (rust/red) — dominant power's core territories and successor states
+- #4a6fa5 (steel blue) — resisting coalitions and democratic opposition blocs
+- #5a8a5a (muted green) — neutral states far from the conflict (use sparingly)
+- #8a6a4a (earth brown) — satellite states, occupied territories, or vassal nations
+- #c9973a (gold) — rising/opportunist powers that exploited the altered timeline
+- #7a4a8a (purple) — collapsed or balkanized former empires
+- #3a6a5a (teal) — secondary allied blocs or puppet states
 
-Example: "What if Hitler won WW2?" → In ${currentYear}: Greater Germanic Reich controls Central Europe (#b5451b), satellite states across Eastern Europe (#8a6a4a), a cold-war-style democratic resistance bloc in the Americas and UK (#4a6fa5), Japanese co-prosperity sphere across East Asia (#c9973a), collapsed Soviet successor states (#7a4a8a), neutral holdouts in South America (#5a8a5a). Almost no country is untouched by ${currentYear}.
-
-You MUST respond with ONLY a JSON object — no markdown, no code fences, no explanation before or after. Just the raw JSON.`;
+You MUST respond with ONLY a JSON object — no markdown, no code fences, no explanation.`;
 
   const userMessage = `Scenario: "${prompt}"
 
-Respond with a JSON object in this exact format:
-{
-  "narrative": "3-4 sentence vivid description of how this hypothetical reshaped history and what the modern world (${currentYear}) looks like as a result",
-  "countries": {
-    "Country Name": { "color": "#hexcolor", "opacity": 0.65, "group": "faction name" }
-  },
-  "legend": [
-    { "color": "#hexcolor", "label": "Faction Name" }
-  ]
-}`;
+JSON format:
+{"narrative":"3-4 sentences","countries":{"Country Name":{"color":"#hex","opacity":0.65,"group":"faction"}},"legend":[{"color":"#hex","label":"Faction"}]}`;
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -148,7 +137,7 @@ Respond with a JSON object in this exact format:
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 16384,
       system: systemPrompt,
       messages: [{ role: 'user', content: userMessage }],

@@ -26,17 +26,12 @@ export default function AiSection({
     setLoading(true);
     onLoadingChange(true, 'Simulating alternate timeline…');
 
-    const countryList = worldGeoJSON
-      ? worldGeoJSON.features.map(f => f.properties.ADMIN || f.properties.name).filter(Boolean).join(', ')
-      : 'various countries';
-
     try {
       const idToken = await user.getIdToken();
       const result = await queryAI({
         idToken,
         prompt: prompt.trim(),
         currentYear: 2026,
-        countryList,
       });
 
       showResponse(result.narrative);
