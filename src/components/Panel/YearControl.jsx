@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getEraKey, ERA_DATA } from '../../data/eraData';
 
 export default function YearControl({ currentYear, onYearChange }) {
   const [inputValue, setInputValue] = useState(String(currentYear));
@@ -13,6 +14,10 @@ export default function YearControl({ currentYear, onYearChange }) {
     const year = Math.max(-3000, Math.min(2024, parseInt(value) || 1945));
     onYearChange(year);
   }
+
+  const parsedInput = parseInt(inputValue);
+  const eraKey = !isNaN(parsedInput) ? getEraKey(parsedInput) : getEraKey(currentYear);
+  const eraLabel = ERA_DATA[eraKey]?.label ?? '';
 
   return (
     <div>
@@ -30,6 +35,7 @@ export default function YearControl({ currentYear, onYearChange }) {
           onKeyDown={(e) => { if (e.key === 'Enter') commitYear(e.target.value); }}
           onBlur={(e) => commitYear(e.target.value)}
         />
+        <div className="era-label">{eraLabel}</div>
       </div>
       <input
         type="range"

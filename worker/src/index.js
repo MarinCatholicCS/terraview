@@ -99,13 +99,22 @@ function base64UrlToArrayBuffer(base64url) {
 }
 
 async function callGemini(apiKey, prompt, currentYear, countryList) {
-  const systemPrompt = `You are a historical cartographer AI for TerraView. The user wants to visualize: "${prompt}" in the year ${currentYear}.
+  const systemPrompt = `You are an aggressive alt-history cartographer AI for TerraView. The user wants to visualize: "${prompt}" in the year ${currentYear}.
+
+CRITICAL RULES — follow these without exception:
+1. Think in MASSIVE ripple effects. A single event reshapes dozens of countries. Never leave an affected region unchanged.
+2. The scenario's dominant power MUST conquer, vassalize, or heavily influence a large number of countries. If someone asks about Mongol invasion of the US, color the US and neighboring territories as Mongol-controlled/influenced — do not leave them "independent".
+3. Conquered or occupied countries get the conqueror's color. Vassals/tributaries get a lighter shade or the "colonial" brown. Allies get the allied color.
+4. Ripple effects: neighboring countries react — some ally with the invader, some resist and get colored differently, some collapse. Show these consequences on the map.
+5. Include ALL countries meaningfully affected — typically 60-180 countries for world-spanning scenarios. Do not be conservative. If a superpower rises, much of the world is affected.
+6. Never leave a country on its default color if the scenario plausibly touches it.
+7. Be dramatic and historically creative. This is alt-history — lean into the chaos.
 
 Return ONLY a JSON object (no markdown, no code fences, no explanation) in this exact format:
 {
-  "narrative": "2-3 sentence description of this historical scenario",
+  "narrative": "3-4 sentence vivid description of this alternate history scenario and its global consequences",
   "countries": {
-    "Country Name": { "color": "#hexcolor", "opacity": 0.6, "group": "faction name" }
+    "Country Name": { "color": "#hexcolor", "opacity": 0.65, "group": "faction name" }
   },
   "legend": [
     { "color": "#hexcolor", "label": "Faction Name" }
@@ -115,14 +124,15 @@ Return ONLY a JSON object (no markdown, no code fences, no explanation) in this 
 Available country names from the dataset: ${countryList}
 
 Color palette:
-- #b5451b (rust/red) for aggressive/dominant powers
-- #4a6fa5 (steel blue) for democratic/allied powers
-- #5a8a5a (muted green) for neutral/independent states
-- #8a6a4a (earth brown) for colonial/occupied territories
-- #c9973a (gold) for emerging/revolutionary powers
-- #7a4a8a (purple) for ancient/fallen empires
+- #b5451b (rust/red) for conquering/dominant aggressive powers and their core territories
+- #4a6fa5 (steel blue) for resisting coalitions and allied democratic powers
+- #5a8a5a (muted green) for neutral states far from the conflict (use sparingly)
+- #8a6a4a (earth brown) for vassal states, occupied or tributary territories
+- #c9973a (gold) for rising/opportunist powers exploiting the chaos
+- #7a4a8a (purple) for collapsed or balkanized former empires
+- #3a6a5a (teal) for secondary allied blocs or puppet states
 
-Only include countries relevant to the scenario (max 40). Be historically informed but creative for alt-history.`;
+Example: "Mongols invade the USA in 1200" → color all of North America as Mongol-conquered (#b5451b), South America as gold opportunist states (#c9973a), Europe as frightened coalition (#4a6fa5), Central Asia as Mongol heartland (#b5451b), Middle East as vassal (#8a6a4a), etc. Almost no country is left untouched.`;
 
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -131,7 +141,12 @@ Only include countries relevant to the scenario (max 40). Be historically inform
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: systemPrompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
+        generationConfig: {
+          temperature: 1.0,
+          maxOutputTokens: 8192,
+          responseMimeType: 'application/json',
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       }),
     }
   );
@@ -147,10 +162,14 @@ Only include countries relevant to the scenario (max 40). Be historically inform
   const rawText = parts
     .filter((p) => !p.thought)
     .map((p) => p.text || '')
-    .join('');
+    .join('')
+    .trim();
 
-  const textToParse = rawText.trim() || parts.map((p) => p.text || '').join('');
-  return parseGeminiJson(textToParse);
+  if (!rawText) {
+    throw new Error('Gemini returned no content');
+  }
+
+  return parseGeminiJson(rawText);
 }
 
 function parseGeminiJson(text) {

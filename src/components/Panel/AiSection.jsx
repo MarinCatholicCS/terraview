@@ -27,7 +27,7 @@ export default function AiSection({
     onLoadingChange(true, 'Querying Gemini AI…');
 
     const countryList = worldGeoJSON
-      ? worldGeoJSON.features.map(f => f.properties.ADMIN || f.properties.name).filter(Boolean).slice(0, 50).join(', ')
+      ? worldGeoJSON.features.map(f => f.properties.ADMIN || f.properties.name).filter(Boolean).join(', ')
       : 'various countries';
 
     try {
