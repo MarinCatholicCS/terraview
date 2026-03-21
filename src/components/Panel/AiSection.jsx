@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { queryGemini } from '../../services/gemini';
 
-const STORAGE_KEY = 'gemini_api_key';
-
 export default function AiSection({
   currentYear,
   currentMode,
@@ -10,23 +8,12 @@ export default function AiSection({
   onAiResult,
   onLoadingChange,
   onModeChange,
+  user,
 }) {
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
-  const [showKey, setShowKey] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [responseVisible, setResponseVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  function handleApiKeyChange(e) {
-    const val = e.target.value;
-    setApiKey(val);
-    if (val.trim()) {
-      localStorage.setItem(STORAGE_KEY, val);
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }
 
   function showResponse(text) {
     setResponse(text);
@@ -34,7 +21,6 @@ export default function AiSection({
   }
 
   async function handleApply() {
-    if (!apiKey.trim()) { showResponse('Please enter your Gemini API key above.'); return; }
     if (!prompt.trim()) { showResponse('Describe a scenario to visualize.'); return; }
 
     setLoading(true);
@@ -45,8 +31,9 @@ export default function AiSection({
       : 'various countries';
 
     try {
+      const idToken = await user.getIdToken();
       const result = await queryGemini({
-        apiKey: apiKey.trim(),
+        idToken,
         prompt: prompt.trim(),
         currentYear,
         countryList,
@@ -71,23 +58,6 @@ export default function AiSection({
   return (
     <div className="ai-section">
       <div className="section-label">Gemini AI Layer</div>
-
-      <div className="key-input-row">
-        <input
-          className="gemini-key-input"
-          type={showKey ? 'text' : 'password'}
-          placeholder="Paste your Gemini API key…"
-          value={apiKey}
-          onChange={handleApiKeyChange}
-        />
-        <button
-          className="key-toggle-btn"
-          onClick={() => setShowKey(v => !v)}
-          title={showKey ? 'Hide key' : 'Show key'}
-        >
-          {showKey ? '◉' : '⊙'}
-        </button>
-      </div>
 
       <textarea
         className="ai-prompt"
