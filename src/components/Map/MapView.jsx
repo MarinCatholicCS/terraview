@@ -122,8 +122,7 @@ export default function MapView({
       <div className="map-container" ref={mapContainerRef} />
 
       <div className="map-topbar">
-        <div className="active-year-badge">Year {currentYear}</div>
-        <div className="mode-badge">
+<div className="mode-badge">
           {currentMode === 'alt-history' ? 'Alt-History Mode' : 'Historical Mode'}
         </div>
       </div>
