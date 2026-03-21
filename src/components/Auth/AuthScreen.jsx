@@ -37,7 +37,7 @@ export default function AuthScreen() {
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="section-label">
-            {isRegister ? 'Create Account' : 'Sign In'}
+            {isRegister ? 'Create Account' : ''}
           </div>
 
           <input

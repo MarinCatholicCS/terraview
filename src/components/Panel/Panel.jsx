@@ -80,10 +80,6 @@ export default function Panel({
 
         <Legend currentYear={currentYear} aiLegend={aiLegend} />
 
-        <p className="info-note">
-          Border data is approximated per era. AI layer modifies territory colors and descriptions.
-          For precise GeoJSON data, connect the Chronas or geoBoundaries API.
-        </p>
       </div>
 
       <StatusBar statusText={statusText} />

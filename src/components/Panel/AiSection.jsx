@@ -52,7 +52,7 @@ export default function AiSection({
 
   return (
     <div className="ai-section">
-      <div className="section-label">What If? Simulator</div>
+      <div className="section-label">How will you change history?</div>
 
       <textarea
         className="ai-prompt"
