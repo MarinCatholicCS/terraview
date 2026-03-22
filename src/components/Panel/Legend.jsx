@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { getEraKey, ERA_DATA } from '../../data/eraData';
 import { capitalize } from '../../utils/helpers';
 
 export default function Legend({ currentYear, aiLegend }) {
   const [collapsed, setCollapsed] = useState(false);
+  const contentRef = useRef(null);
+  const [contentHeight, setContentHeight] = useState('auto');
+
   const eraKey = getEraKey(currentYear);
   const era = ERA_DATA[eraKey];
 
@@ -21,13 +24,29 @@ export default function Legend({ currentYear, aiLegend }) {
         </div>
       ));
 
+  // Measure content height for smooth animation
+  useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight + 'px');
+    }
+  }, [items.length, eraKey, aiLegend]);
+
   return (
     <div className="legend">
       <button className="legend-toggle" onClick={() => setCollapsed((v) => !v)}>
         <span className={`legend-arrow${collapsed ? ' collapsed' : ''}`}>&#9662;</span>
         Active Powers
       </button>
-      {!collapsed && items}
+      <div
+        className="legend-content"
+        ref={contentRef}
+        style={{
+          maxHeight: collapsed ? '0px' : contentHeight,
+          opacity: collapsed ? 0 : 1,
+        }}
+      >
+        {items}
+      </div>
     </div>
   );
 }

@@ -70,7 +70,7 @@ export default function App() {
       <div className="auth-screen">
         <div className="auth-card">
           <div className="auth-header">
-            <h1 className="logo">Terra<span>View</span></h1>
+            <h1 className="logo"><img src="/terraview.png" alt="" className="logo-icon" />Terra<span>View</span></h1>
             <p className="tagline">Loading…</p>
           </div>
         </div>
