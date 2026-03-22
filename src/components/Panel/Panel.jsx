@@ -3,15 +3,12 @@ import PanelHeader from './PanelHeader';
 import YearControl from './YearControl';
 import AiSection from './AiSection';
 
-import StatusBar from './StatusBar';
-
 export default function Panel({
   currentYear,
   currentMode,
   worldGeoJSON,
   aiLegend,
   aiEvents,
-  statusText,
   isLoading,
   panelWidth,
   onPanelResize,
@@ -109,7 +106,6 @@ export default function Panel({
 
       </div>
 
-      <StatusBar statusText={statusText} />
       <div className="panel-resize-handle" onMouseDown={handleResizeStart} />
     </div>
   );

@@ -8,13 +8,12 @@ const GEOJSON_URL = 'https://raw.githubusercontent.com/datasets/geo-countries/ma
 
 export default function App() {
   const [user, setUser] = useState(undefined); // undefined = loading, null = signed out
-  const [currentYear, setCurrentYear] = useState(1945);
+  const [currentYear, setCurrentYear] = useState(2026);
   const [currentMode, setCurrentMode] = useState('historical');
   const [worldGeoJSON, setWorldGeoJSON] = useState(null);
   const [aiOverrides, setAiOverrides] = useState(null);
   const [aiLegend, setAiLegend] = useState(null);
   const [aiEvents, setAiEvents] = useState(null);
-  const [statusText, setStatusText] = useState('Ready — Year 1945');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Consulting the archives…');
   const [panelWidth, setPanelWidth] = useState(340);
@@ -31,13 +30,12 @@ export default function App() {
     fetch(GEOJSON_URL)
       .then((res) => res.json())
       .then((data) => setWorldGeoJSON(data))
-      .catch(() => setStatusText('Border data unavailable — check connection'))
+      .catch(() => console.error('Border data unavailable — check connection'))
       .finally(() => setIsLoading(false));
   }, [user]);
 
   const handleYearChange = useCallback((year, fromAi) => {
     setCurrentYear(year);
-    setStatusText(`Viewing year ${year}`);
     if (!fromAi && currentMode === 'alt-history') {
       setCurrentMode('historical');
       setAiOverrides(null);
@@ -92,7 +90,6 @@ export default function App() {
         currentMode={currentMode}
         worldGeoJSON={worldGeoJSON}
         aiLegend={aiLegend}
-        statusText={statusText}
         isLoading={isLoading}
         panelWidth={panelWidth}
         onPanelResize={setPanelWidth}
