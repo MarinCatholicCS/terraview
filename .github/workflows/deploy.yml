@@ -1,8 +1,0 @@
-# Deployment is handled by Vercel's GitHub integration.
-# Vercel auto-deploys on push to main (production) and on PRs (preview).
-# This workflow is kept for reference only.
-#
-# To set up:
-# 1. Connect this repo to Vercel at vercel.com/new
-# 2. Framework preset: Vite
-# 3. Add VITE_* environment variables in Vercel dashboard → Settings → Environment Variables
