@@ -10,6 +10,7 @@ export default function Panel({
   currentMode,
   worldGeoJSON,
   aiLegend,
+  aiEvents,
   statusText,
   isLoading,
   panelWidth,
@@ -102,6 +103,7 @@ export default function Panel({
           onLoadingChange={onLoadingChange}
           onModeChange={onModeChange}
           onYearChange={onYearChange}
+          aiEvents={aiEvents}
           user={user}
         />
 

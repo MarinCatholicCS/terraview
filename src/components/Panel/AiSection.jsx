@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { queryAI } from '../../services/gemini';
+import EventTree from './EventTree';
 
 const LOADING_PHRASES = [
   'Rewriting the timeline\u2026',
@@ -20,6 +21,7 @@ export default function AiSection({
   onLoadingChange,
   onModeChange,
   onYearChange,
+  aiEvents,
   user,
 }) {
   const [prompt, setPrompt] = useState('');
@@ -61,7 +63,7 @@ export default function AiSection({
 
       showResponse(result.narrative);
       onModeChange('alt-history');
-      onAiResult(result.overrides, result.legend);
+      onAiResult(result.overrides, result.legend, result.events);
     } catch (e) {
       showResponse(`Error: ${e.message}`);
     } finally {
@@ -102,6 +104,8 @@ export default function AiSection({
       <div className={`ai-response${responseVisible ? ' visible' : ''}`}>
         {response}
       </div>
+
+      {responseVisible && <EventTree events={aiEvents} />}
     </div>
   );
 }

@@ -344,12 +344,121 @@ body {
 
 .ai-response.visible { display: block; }
 
+/* Event Tree */
+.event-tree {
+  margin-top: 10px;
+}
+
+.event-tree-container {
+  padding: 4px 0;
+}
+
+.event-node {
+  position: relative;
+}
+
+.event-node-content {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink);
+  word-wrap: break-word;
+  margin-bottom: 4px;
+}
+
+.event-root > .event-node-content {
+  border-left: 3px solid #b5451b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.event-year {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 10px;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+.event-root > .event-node-content .event-year {
+  color: #b5451b;
+}
+
+.event-text {
+  color: var(--ink);
+}
+
+.event-children {
+  padding-left: 16px;
+  position: relative;
+}
+
+.event-children::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 12px;
+  border-left: 1px solid var(--border);
+}
+
+.event-children > .event-node {
+  position: relative;
+}
+
+.event-children > .event-node::before {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: 14px;
+  width: 8px;
+  border-top: 1px solid var(--border);
+}
+
 /* Legend — on map overlay */
 .legend {
   background: transparent;
   border: none;
   border-radius: 0;
   padding: 0;
+}
+
+.legend-toggle {
+  background: none;
+  border: none;
+  padding: 0 0 8px 0;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(184,146,45,0.2);
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  opacity: 0.9;
+}
+
+.legend-toggle:hover {
+  opacity: 1;
+}
+
+.legend-arrow {
+  font-size: 8px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.legend-arrow.collapsed {
+  transform: rotate(-90deg);
 }
 
 .legend-item {

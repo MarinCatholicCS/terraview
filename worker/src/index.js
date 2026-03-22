@@ -122,12 +122,14 @@ Color palette:
 - #7a4a8a (purple) — collapsed or balkanized former empires
 - #3a6a5a (teal) — secondary allied blocs or puppet states
 
+Also generate a cascading events tree showing the chain of consequences from the divergence point to the modern day. The tree must have 3-4 levels deep maximum and 2-3 branches per node maximum. Each node has an "event" string (concise, under 60 characters) and a "year" number. The root node is the original divergence event.
+
 You MUST respond with ONLY a JSON object — no markdown, no code fences, no explanation.`;
 
   const userMessage = `Scenario: "${prompt}"
 
 JSON format:
-{"narrative":"3-4 sentences","countries":{"Country Name":{"color":"#hex","opacity":0.65,"group":"faction"}},"legend":[{"color":"#hex","label":"Faction"}]}`;
+{"narrative":"3-4 sentences","events":{"event":"divergence","year":1945,"children":[{"event":"consequence","year":1950,"children":[{"event":"effect","year":1970,"children":[]}]}]},"countries":{"Country Name":{"color":"#hex","opacity":0.65,"group":"faction"}},"legend":[{"color":"#hex","label":"Faction"}]}`;
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

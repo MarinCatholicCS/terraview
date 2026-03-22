@@ -13,6 +13,7 @@ export default function App() {
   const [worldGeoJSON, setWorldGeoJSON] = useState(null);
   const [aiOverrides, setAiOverrides] = useState(null);
   const [aiLegend, setAiLegend] = useState(null);
+  const [aiEvents, setAiEvents] = useState(null);
   const [statusText, setStatusText] = useState('Ready — Year 1945');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Consulting the archives…');
@@ -41,6 +42,7 @@ export default function App() {
       setCurrentMode('historical');
       setAiOverrides(null);
       setAiLegend(null);
+      setAiEvents(null);
     }
   }, [currentMode]);
 
@@ -49,12 +51,14 @@ export default function App() {
     if (mode === 'historical') {
       setAiOverrides(null);
       setAiLegend(null);
+      setAiEvents(null);
     }
   }, []);
 
-  const handleAiResult = useCallback((overrides, legend) => {
+  const handleAiResult = useCallback((overrides, legend, events) => {
     setAiOverrides(overrides);
     setAiLegend(legend);
+    setAiEvents(events);
   }, []);
 
   const handleLoadingChange = useCallback((loading, text) => {
@@ -94,6 +98,7 @@ export default function App() {
         onPanelResize={setPanelWidth}
         onYearChange={handleYearChange}
         onModeChange={handleModeChange}
+        aiEvents={aiEvents}
         onAiResult={handleAiResult}
         onLoadingChange={handleLoadingChange}
         user={user}

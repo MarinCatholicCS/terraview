@@ -32,5 +32,6 @@ function formatResult(parsed) {
     narrative: parsed.narrative || 'Scenario applied.',
     overrides,
     legend: parsed.legend || null,
+    events: parsed.events || null,
   };
 }
