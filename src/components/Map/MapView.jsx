@@ -2,8 +2,9 @@ import { useRef, useEffect } from 'react';
 import L from 'leaflet';
 import { getEraKey, ERA_DATA } from '../../data/eraData';
 import { capitalize } from '../../utils/helpers';
+import Legend from '../Panel/Legend';
 
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png';
+const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
 const TILE_ATTR = '&copy; <a href="https://carto.com/">CARTO</a>';
 
 export default function MapView({
@@ -11,6 +12,7 @@ export default function MapView({
   currentMode,
   worldGeoJSON,
   aiOverrides,
+  aiLegend,
   isLoading,
   loadingText,
 }) {
@@ -163,6 +165,10 @@ export default function MapView({
   return (
     <div className="map-wrapper">
       <div className="map-container" ref={mapContainerRef} />
+
+      <div className="map-legend">
+        <Legend currentYear={currentYear} aiLegend={aiLegend} />
+      </div>
 
       <div className={`loading-overlay${isLoading ? ' visible' : ''}`}>
         <div className="spinner" />

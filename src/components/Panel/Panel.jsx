@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import PanelHeader from './PanelHeader';
 import YearControl from './YearControl';
 import AiSection from './AiSection';
-import Legend from './Legend';
+
 import StatusBar from './StatusBar';
 
 export default function Panel({
@@ -11,6 +11,9 @@ export default function Panel({
   worldGeoJSON,
   aiLegend,
   statusText,
+  isLoading,
+  panelWidth,
+  onPanelResize,
   onYearChange,
   onModeChange,
   onAiResult,
@@ -21,6 +24,29 @@ export default function Panel({
 }) {
   const [showAccount, setShowAccount] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const handleResizeStart = useCallback((e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = panelWidth;
+
+    function onMouseMove(e) {
+      const newWidth = Math.min(600, Math.max(280, startWidth + (e.clientX - startX)));
+      onPanelResize(newWidth);
+    }
+
+    function onMouseUp() {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, [panelWidth, onPanelResize]);
 
   async function handleDelete() {
     if (!window.confirm('Permanently delete your account? This cannot be undone.')) return;
@@ -38,7 +64,7 @@ export default function Panel({
   }
 
   return (
-    <div className="panel">
+    <div className="panel" style={{ width: panelWidth, minWidth: panelWidth }}>
       <PanelHeader />
 
       <div className="panel-body">
@@ -66,7 +92,7 @@ export default function Panel({
           )}
         </div>
 
-        <YearControl currentYear={currentYear} onYearChange={onYearChange} />
+        <YearControl currentYear={currentYear} onYearChange={onYearChange} disabled={isLoading} />
 
         <AiSection
           currentYear={currentYear}
@@ -75,14 +101,14 @@ export default function Panel({
           onAiResult={onAiResult}
           onLoadingChange={onLoadingChange}
           onModeChange={onModeChange}
+          onYearChange={onYearChange}
           user={user}
         />
-
-        <Legend currentYear={currentYear} aiLegend={aiLegend} />
 
       </div>
 
       <StatusBar statusText={statusText} />
+      <div className="panel-resize-handle" onMouseDown={handleResizeStart} />
     </div>
   );
 }

@@ -16,6 +16,7 @@ export default function App() {
   const [statusText, setStatusText] = useState('Ready — Year 1945');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Consulting the archives…');
+  const [panelWidth, setPanelWidth] = useState(340);
 
   // Listen to auth state
   useEffect(() => onAuthChange(setUser), []);
@@ -33,10 +34,15 @@ export default function App() {
       .finally(() => setIsLoading(false));
   }, [user]);
 
-  const handleYearChange = useCallback((year) => {
+  const handleYearChange = useCallback((year, fromAi) => {
     setCurrentYear(year);
     setStatusText(`Viewing year ${year}`);
-  }, []);
+    if (!fromAi && currentMode === 'alt-history') {
+      setCurrentMode('historical');
+      setAiOverrides(null);
+      setAiLegend(null);
+    }
+  }, [currentMode]);
 
   const handleModeChange = useCallback((mode) => {
     setCurrentMode(mode);
@@ -83,6 +89,9 @@ export default function App() {
         worldGeoJSON={worldGeoJSON}
         aiLegend={aiLegend}
         statusText={statusText}
+        isLoading={isLoading}
+        panelWidth={panelWidth}
+        onPanelResize={setPanelWidth}
         onYearChange={handleYearChange}
         onModeChange={handleModeChange}
         onAiResult={handleAiResult}
@@ -96,6 +105,7 @@ export default function App() {
         currentMode={currentMode}
         worldGeoJSON={worldGeoJSON}
         aiOverrides={aiOverrides}
+        aiLegend={aiLegend}
         isLoading={isLoading}
         loadingText={loadingText}
       />

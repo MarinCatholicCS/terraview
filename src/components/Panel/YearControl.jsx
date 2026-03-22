@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getEraKey, ERA_DATA } from '../../data/eraData';
 
-export default function YearControl({ currentYear, onYearChange }) {
+export default function YearControl({ currentYear, onYearChange, disabled }) {
   const [inputValue, setInputValue] = useState(String(currentYear));
   const [sliderValue, setSliderValue] = useState(Math.max(1, currentYear));
 
@@ -30,6 +30,7 @@ export default function YearControl({ currentYear, onYearChange }) {
           min="-3000"
           max="2026"
           value={inputValue}
+          disabled={disabled}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') commitYear(e.target.value); }}
           onBlur={(e) => commitYear(e.target.value)}
@@ -42,6 +43,7 @@ export default function YearControl({ currentYear, onYearChange }) {
         min="1"
         max="2026"
         value={sliderValue}
+        disabled={disabled}
         onInput={(e) => {
           const y = parseInt(e.target.value);
           setSliderValue(y);

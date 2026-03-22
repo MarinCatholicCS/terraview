@@ -1,5 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { queryAI } from '../../services/gemini';
+
+const LOADING_PHRASES = [
+  'Rewriting the timeline\u2026',
+  'Altering the course of nations\u2026',
+  'Tracing the butterfly effect\u2026',
+  'Redrawing borders\u2026',
+  'Consulting alternate historians\u2026',
+  'Unraveling causality chains\u2026',
+  'Forging a new world order\u2026',
+  'Calculating geopolitical ripples\u2026',
+];
 
 export default function AiSection({
   currentYear,
@@ -8,12 +19,24 @@ export default function AiSection({
   onAiResult,
   onLoadingChange,
   onModeChange,
+  onYearChange,
   user,
 }) {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [responseVisible, setResponseVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const phraseIndex = useRef(0);
+
+  // Rotate loading phrases while loading
+  useEffect(() => {
+    if (!loading) return;
+    const interval = setInterval(() => {
+      phraseIndex.current = (phraseIndex.current + 1) % LOADING_PHRASES.length;
+      onLoadingChange(true, LOADING_PHRASES[phraseIndex.current]);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [loading, onLoadingChange]);
 
   function showResponse(text) {
     setResponse(text);
@@ -24,7 +47,9 @@ export default function AiSection({
     if (!prompt.trim()) { showResponse('⚠ Describe a scenario to visualize.'); return; }
 
     setLoading(true);
-    onLoadingChange(true, 'Simulating alternate timeline…');
+    phraseIndex.current = 0;
+    onLoadingChange(true, LOADING_PHRASES[0]);
+    onYearChange(2026, true);
 
     try {
       const idToken = await user.getIdToken();
