@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import PanelHeader from './PanelHeader';
 import YearControl from './YearControl';
 import AiSection from './AiSection';
@@ -18,11 +18,9 @@ export default function Panel({
   onLoadingChange,
   user,
   onLogOut,
-  onDeleteAccount,
+  credits,
+  onCreditUsed,
 }) {
-  const [showAccount, setShowAccount] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-
   const handleResizeStart = useCallback((e) => {
     e.preventDefault();
     const startX = e.clientX;
@@ -46,21 +44,6 @@ export default function Panel({
     document.body.style.userSelect = 'none';
   }, [panelWidth, onPanelResize]);
 
-  async function handleDelete() {
-    if (!window.confirm('Permanently delete your account? This cannot be undone.')) return;
-    setDeleting(true);
-    try {
-      await onDeleteAccount();
-    } catch (err) {
-      const msg = err.code === 'auth/requires-recent-login'
-        ? 'Please sign out and sign back in, then try again.'
-        : err.message;
-      alert('Could not delete account: ' + msg);
-    } finally {
-      setDeleting(false);
-    }
-  }
-
   return (
     <div className="panel" style={{ width: panelWidth, minWidth: panelWidth }}>
       <PanelHeader />
@@ -68,26 +51,13 @@ export default function Panel({
       <div className="panel-body">
         {/* Account bar */}
         <div className="account-bar">
-          <button
-            className="account-toggle"
-            onClick={() => setShowAccount((v) => !v)}
-            title={user.email}
-          >
-            {user.email}
-          </button>
-
-          {showAccount && (
-            <div className="account-menu">
-              <button className="reset-btn" onClick={onLogOut}>Sign Out</button>
-              <button
-                className="reset-btn account-delete-btn"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                {deleting ? 'Deleting…' : 'Delete Account'}
-              </button>
-            </div>
-          )}
+          <div className="account-info">
+            {user.photoURL && (
+              <img className="account-avatar" src={user.photoURL} alt="" referrerPolicy="no-referrer" />
+            )}
+            <span className="account-name">{user.displayName || user.email}</span>
+          </div>
+          <button className="reset-btn" onClick={onLogOut}>Sign Out</button>
         </div>
 
         <YearControl currentYear={currentYear} onYearChange={onYearChange} disabled={isLoading} />
@@ -102,6 +72,8 @@ export default function Panel({
           onYearChange={onYearChange}
           aiEvents={aiEvents}
           user={user}
+          credits={credits}
+          onCreditUsed={onCreditUsed}
         />
 
       </div>

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Panel from './components/Panel/Panel';
 import MapView from './components/Map/MapView';
 import AuthScreen from './components/Auth/AuthScreen';
-import { onAuthChange, logOut, deleteAccount } from './services/firebase';
+import { onAuthChange, logOut, initUserCredits } from './services/firebase';
 
 const GEOJSON_URL = 'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson';
 
@@ -17,9 +17,16 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Consulting the archives…');
   const [panelWidth, setPanelWidth] = useState(340);
+  const [credits, setCredits] = useState(null);
 
   // Listen to auth state
   useEffect(() => onAuthChange(setUser), []);
+
+  // Init credits on sign-in
+  useEffect(() => {
+    if (!user) { setCredits(null); return; }
+    initUserCredits(user.uid, user.email).then(setCredits).catch(() => {});
+  }, [user]);
 
   // Fetch world GeoJSON on mount
   useEffect(() => {
@@ -64,6 +71,10 @@ export default function App() {
     if (text) setLoadingText(text);
   }, []);
 
+  const handleCreditUsed = useCallback(() => {
+    setCredits((prev) => (prev !== null ? Math.max(0, prev - 1) : prev));
+  }, []);
+
   // Auth loading state
   if (user === undefined) {
     return (
@@ -100,7 +111,8 @@ export default function App() {
         onLoadingChange={handleLoadingChange}
         user={user}
         onLogOut={logOut}
-        onDeleteAccount={deleteAccount}
+        credits={credits}
+        onCreditUsed={handleCreditUsed}
       />
       <MapView
         currentYear={currentYear}

@@ -25,12 +25,12 @@ export default function MapView({
     if (!mapContainerRef.current || mapRef.current) return;
 
     const map = L.map(mapContainerRef.current, {
-      center: [20, 10],
-      zoom: 2,
-      minZoom: 2,
+      center: [30, 10],
+      zoom: 3,
+      minZoom: 3,
       zoomControl: false,
       attributionControl: false,
-      maxBounds: [[-90, -180], [90, 180]],
+      maxBounds: [[-60, -180], [85, 180]],
       maxBoundsViscosity: 1.0,
     });
 
@@ -38,6 +38,7 @@ export default function MapView({
       attribution: TILE_ATTR,
       subdomains: 'abcd',
       maxZoom: 10,
+      noWrap: true,
     }).addTo(map);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -100,6 +101,7 @@ export default function MapView({
     if (geoLayerRef.current) {
       geoLayerRef.current.eachLayer((layer) => {
         const name = layer.feature.properties.ADMIN || layer.feature.properties.name || '';
+        if (name === 'Antarctica') return;
         const newStyle = getStyle(name);
         layer._baseStyle = newStyle;
         layer.setStyle(newStyle);
@@ -122,7 +124,15 @@ export default function MapView({
       return;
     }
 
-    const geoLayer = L.geoJSON(worldGeoJSON, {
+    const filtered = {
+      ...worldGeoJSON,
+      features: worldGeoJSON.features.filter((f) => {
+        const name = f.properties.ADMIN || f.properties.name || '';
+        return name !== 'Antarctica';
+      }),
+    };
+
+    const geoLayer = L.geoJSON(filtered, {
       style: (feature) => {
         const name = feature.properties.ADMIN || feature.properties.name || '';
         return getStyle(name);

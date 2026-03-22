@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { queryAI } from '../../services/gemini';
+import { useCredit } from '../../services/firebase';
 import EventTree from './EventTree';
 
 const LOADING_PHRASES = [
@@ -23,6 +24,8 @@ export default function AiSection({
   onYearChange,
   aiEvents,
   user,
+  credits,
+  onCreditUsed,
 }) {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
@@ -45,8 +48,11 @@ export default function AiSection({
     setResponseVisible(true);
   }
 
+  const outOfCredits = credits !== null && credits <= 0;
+
   async function handleApply() {
-    if (!prompt.trim()) { showResponse('⚠ Describe a scenario to visualize.'); return; }
+    if (!prompt.trim()) { showResponse('Describe a scenario to visualize.'); return; }
+    if (outOfCredits) { showResponse('No simulations remaining.'); return; }
 
     setLoading(true);
     phraseIndex.current = 0;
@@ -60,6 +66,10 @@ export default function AiSection({
         prompt: prompt.trim(),
         currentYear: 2026,
       });
+
+      // Deduct credit after successful call
+      await useCredit(user.uid);
+      onCreditUsed();
 
       showResponse(result.narrative);
       onModeChange('alt-history');
@@ -81,19 +91,39 @@ export default function AiSection({
     <div className="ai-section">
       <div className="section-label">How will you change history?</div>
 
+      {credits !== null && (
+        <div className="token-counter">
+          <span className={`token-count${outOfCredits ? ' depleted' : ''}`}>
+            {credits}
+          </span>
+          <span className="token-label">
+            {credits === 1 ? 'simulation remaining' : 'simulations remaining'}
+          </span>
+        </div>
+      )}
+
       <textarea
         className="ai-prompt"
         placeholder={"What if…?\ne.g. 'What if Hitler won WW2?'\ne.g. 'What if the Roman Empire never fell?'"}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
+        disabled={outOfCredits}
       />
 
       <button
-        className={`apply-btn${loading ? ' loading' : ''}`}
+        className={`apply-btn${loading ? ' loading' : ''}${outOfCredits ? ' disabled' : ''}`}
         onClick={handleApply}
+        disabled={outOfCredits || loading}
       >
-        {loading ? 'Simulating…' : 'Simulate'}
+        {loading ? 'Simulating…' : outOfCredits ? 'No Simulations Left' : 'Simulate'}
       </button>
+
+      {outOfCredits && (
+        <div className="credits-notice">
+          Each simulation uses the Claude API, which has associated costs, so accounts are limited to 5 free simulations. To request additional credits, reach out to Stanley Ho or email{' '}
+          <a href="mailto:stanleyho862@gmail.com">stanleyho862@gmail.com</a>.
+        </div>
+      )}
 
       {currentMode === 'alt-history' && (
         <button className="reset-btn" onClick={handleReset}>
