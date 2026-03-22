@@ -82,17 +82,17 @@ export default function MapView({
         return {
           fillColor: s.color,
           fillOpacity: s.opacity,
-          color: 'rgba(245,237,224,0.12)',
-          weight: 0.7,
-          opacity: 1,
+          color: s.color,
+          weight: 1.5,
+          opacity: 0.3,
         };
       }
       return {
         fillColor: '#1e2f3d',
         fillOpacity: 0.3,
-        color: 'rgba(245,237,224,0.06)',
-        weight: 0.5,
-        opacity: 1,
+        color: '#1e2f3d',
+        weight: 1.5,
+        opacity: 0.3,
       };
     }
 

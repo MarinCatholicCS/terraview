@@ -467,6 +467,7 @@ body {
 /* Smooth territory transitions (fill only, not stroke — so hover border is instant) */
 .leaflet-interactive {
   transition: fill 0.8s ease, fill-opacity 0.8s ease;
+  outline: none !important;
 }
 
 /* Loading overlay */
