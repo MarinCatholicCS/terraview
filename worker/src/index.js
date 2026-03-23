@@ -110,6 +110,7 @@ CRITICAL RULES:
 4. You MUST assign a color to EVERY country in the provided country list. No country should be left out.
 5. Use ONLY the exact country names provided in the country list — do not rename, abbreviate, or modify them.
 6. Be dramatic and historically creative.
+7. ALWAYS use modern/present-day country names in the output, even when the scenario involves historical entities. For example, use "Russia" not "USSR" or "Soviet Union", use "Germany" not "West Germany" or "East Germany", use "Czechia" not "Czechoslovakia", use "Ethiopia" not "Abyssinia". The map only has modern borders — historical names will not match any country and will be silently ignored.
 
 Color palette:
 - #b5451b (rust/red) — dominant power's core territories and successor states
