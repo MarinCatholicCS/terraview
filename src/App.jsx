@@ -71,8 +71,12 @@ export default function App() {
     if (text) setLoadingText(text);
   }, []);
 
-  const handleCreditUsed = useCallback(() => {
-    setCredits((prev) => (prev !== null ? Math.max(0, prev - 1) : prev));
+  const handleCreditUsed = useCallback((creditsRemaining) => {
+    if (creditsRemaining !== undefined && creditsRemaining !== null) {
+      setCredits(creditsRemaining);
+    } else {
+      setCredits((prev) => (prev !== null ? Math.max(0, prev - 1) : prev));
+    }
   }, []);
 
   // Auth loading state

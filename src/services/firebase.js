@@ -11,8 +11,6 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
-  increment,
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -60,6 +58,3 @@ export async function getCredits(uid) {
   return snap.data().credits;
 }
 
-export async function useCredit(uid) {
-  await updateDoc(doc(db, 'users', uid), { credits: increment(-1) });
-}

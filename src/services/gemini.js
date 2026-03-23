@@ -33,5 +33,6 @@ function formatResult(parsed) {
     overrides,
     legend: parsed.legend || null,
     events: parsed.events || null,
+    creditsRemaining: parsed.creditsRemaining ?? null,
   };
 }
