@@ -1,6 +1,6 @@
 const WORKER_URL = import.meta.env.VITE_WORKER_URL;
 
-export async function queryAI({ idToken, prompt, currentYear }) {
+export async function queryAI({ idToken, prompt, currentYear, countryNames }) {
   if (!WORKER_URL) {
     throw new Error('VITE_WORKER_URL is not configured');
   }
@@ -11,7 +11,7 @@ export async function queryAI({ idToken, prompt, currentYear }) {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`,
     },
-    body: JSON.stringify({ prompt, currentYear }),
+    body: JSON.stringify({ prompt, currentYear, countryNames }),
   });
 
   if (!res.ok) {

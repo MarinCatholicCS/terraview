@@ -61,10 +61,17 @@ export default function AiSection({
 
     try {
       const idToken = await user.getIdToken();
+      const countryNames = worldGeoJSON
+        ? worldGeoJSON.features
+            .map((f) => f.properties.ADMIN || f.properties.name)
+            .filter((n) => n && n !== 'Antarctica')
+        : [];
+
       const result = await queryAI({
         idToken,
         prompt: prompt.trim(),
         currentYear: 2026,
+        countryNames,
       });
 
       // Deduct credit after successful call

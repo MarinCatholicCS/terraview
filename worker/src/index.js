@@ -25,13 +25,13 @@ export default {
       await verifyFirebaseToken(idToken, env.FIREBASE_PROJECT_ID);
 
       // 2. Parse request body
-      const { prompt, currentYear } = await request.json();
+      const { prompt, currentYear, countryNames } = await request.json();
       if (!prompt) {
         return jsonResponse({ error: 'Missing prompt' }, 400);
       }
 
       // 3. Call Claude API
-      const result = await callClaude(env.ANTHROPIC_API_KEY, prompt, currentYear);
+      const result = await callClaude(env.ANTHROPIC_API_KEY, prompt, currentYear, countryNames);
       return jsonResponse(result);
     } catch (err) {
       const status = (err && err.status) ? err.status : 500;
@@ -98,7 +98,7 @@ function base64UrlToArrayBuffer(base64url) {
   return bytes.buffer;
 }
 
-async function callClaude(apiKey, prompt, currentYear) {
+async function callClaude(apiKey, prompt, currentYear, countryNames) {
   const systemPrompt = `You are a hypothetical impact simulator for TerraView. Given a hypothetical scenario, trace its cascading consequences forward through history to the present day (${currentYear}).
 
 Your job: show what the MODERN world map would look like TODAY if this hypothetical had actually happened. Use present-day country names and borders as the baseline, then recolor them based on how this scenario would have reshaped geopolitics by now.
@@ -107,11 +107,9 @@ CRITICAL RULES:
 1. Trace cascading consequences across decades/centuries to the modern day.
 2. The scenario's dominant power or ideology MUST influence a large number of modern countries by ${currentYear}. Show successor states, ideological blocs, and spheres of influence as they exist TODAY.
 3. Countries aligned with the dominant power get its color. Vassal/satellite states get brown. Resistant coalitions get steel blue.
-4. Include ALL countries meaningfully affected — typically 60-180 countries for world-spanning scenarios.
-5. Never leave a country on its default color if the scenario plausibly touches it.
+4. You MUST assign a color to EVERY country in the provided country list. No country should be left out.
+5. Use ONLY the exact country names provided in the country list — do not rename, abbreviate, or modify them.
 6. Be dramatic and historically creative.
-
-Use standard country names as they appear in international GeoJSON datasets (e.g., "United States of America" not "USA", "United Kingdom" not "UK", "Czechia" not "Czech Republic", "Republic of Serbia" not "Serbia", "United Republic of Tanzania" not "Tanzania", "eSwatini" not "Swaziland").
 
 Color palette:
 - #b5451b (rust/red) — dominant power's core territories and successor states
@@ -126,7 +124,11 @@ Also generate a cascading events tree showing the chain of consequences from the
 
 You MUST respond with ONLY a JSON object — no markdown, no code fences, no explanation.`;
 
-  const userMessage = `Scenario: "${prompt}"
+  const countryListStr = Array.isArray(countryNames) && countryNames.length > 0
+    ? `\n\nCountry list (use these EXACT names as keys in the "countries" object):\n${countryNames.join(', ')}`
+    : '';
+
+  const userMessage = `Scenario: "${prompt}"${countryListStr}
 
 JSON format:
 {"narrative":"3-4 sentences","events":{"event":"divergence","year":1945,"children":[{"event":"consequence","year":1950,"children":[{"event":"effect","year":1970,"children":[]}]}]},"countries":{"Country Name":{"color":"#hex","opacity":0.65,"group":"faction"}},"legend":[{"color":"#hex","label":"Faction"}]}`;
@@ -140,7 +142,7 @@ JSON format:
     },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 16384,
+      max_tokens: 32768,
       system: systemPrompt,
       messages: [{ role: 'user', content: userMessage }],
     }),
@@ -153,7 +155,11 @@ JSON format:
 
   const data = await res.json();
 
-  if (data.stop_reason && data.stop_reason !== 'end_turn' && data.stop_reason !== 'max_tokens') {
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error('Response was truncated — scenario may be too complex. Try a simpler prompt.');
+  }
+
+  if (data.stop_reason && data.stop_reason !== 'end_turn') {
     throw new Error(`Claude stop reason: ${data.stop_reason}`);
   }
 
