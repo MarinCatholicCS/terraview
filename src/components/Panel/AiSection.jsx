@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { queryAI } from '../../services/gemini';
+import { useCredit } from '../../services/firebase';
 import EventTree from './EventTree';
 
 const LOADING_PHRASES = [
@@ -73,10 +74,9 @@ export default function AiSection({
         countryNames,
       });
 
-      // Update credits from server-authoritative count
-      if (result.creditsRemaining !== null && result.creditsRemaining !== undefined) {
-        onCreditUsed(result.creditsRemaining);
-      }
+      // Deduct credit after successful call
+      await useCredit(user.uid);
+      onCreditUsed();
 
       showResponse(result.narrative);
       onModeChange('alt-history');
